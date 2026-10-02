@@ -1,0 +1,83 @@
+@php
+    $currencySymbol = ($account->currency ?? 'EUR') === 'USD' ? '$' : '€';
+@endphp
+<div>
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center shadow-xs flex-shrink-0"
+                 style="background-color: {{ $account->color }}25; color: {{ $account->color }};">
+                @if($account->type === 'cash')
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                @elseif($account->type === 'savings')
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                @elseif($account->type === 'credit')
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                @else
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                @endif
+            </div>
+            <div>
+                <h2 class="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                    {{ $account->name }}
+                </h2>
+                <span class="text-[10px] text-slate-400 capitalize">{{ $account->type }} • {{ $account->currency }}</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Edit Account Button -->
+            <button type="button" 
+                    hx-get="{{ route('accounts.edit', $account) }}"
+                    hx-target="#modal-body"
+                    class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                    title="{{ __('Edit Account') }}">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span>{{ __('Edit') }}</span>
+            </button>
+
+            <!-- Close Button -->
+            <button type="button" @click="modalOpen = false" class="p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Account Balance Hero Banner -->
+    <div class="app-card rounded-2xl p-4 mb-4 border border-slate-200 dark:border-[#232d42] bg-gradient-to-b from-slate-50 to-slate-100/50 dark:from-[#161d2b] dark:to-[#111723] flex items-center justify-between">
+        <div>
+            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">{{ __('Account Balance') }}</span>
+            <div class="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
+                {{ $currencySymbol }}{{ number_format($account->balance, 2) }}
+            </div>
+        </div>
+        <div class="text-right">
+            <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">
+                {{ $transactions->total() }} {{ __('Recent Transactions') }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Transactions Section -->
+    <div class="space-y-2">
+        <div class="flex items-center justify-between px-1 mb-1">
+            <h3 class="text-xs font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+                <span>{{ __('Account Transactions') }}</span>
+            </h3>
+            <span class="text-[10px] text-slate-400">{{ __('Newest first') }}</span>
+        </div>
+
+        <!-- Scrollable Transactions List with Infinite Scroll -->
+        <div id="account-transactions-list"
+             class="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar pr-0.5"
+             hx-get="{{ route('accounts.show', ['account' => $account, 'feed_only' => 1]) }}"
+             hx-trigger="transactionUpdated from:window, transactionDeleted from:window, transactionCreated from:window"
+             hx-swap="innerHTML">
+            @include('accounts.partials.transactions_feed', ['account' => $account, 'transactions' => $transactions])
+        </div>
+    </div>
+</div>
