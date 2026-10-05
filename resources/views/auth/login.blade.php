@@ -59,6 +59,14 @@
                 @enderror
             </div>
 
+            <!-- Remember Me -->
+            <div class="flex items-center justify-between py-1">
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" name="remember" value="1" checked class="w-4 h-4 rounded text-brand-600 bg-slate-50 dark:bg-[#141926] border-slate-300 dark:border-[#232d42] focus:ring-brand-500 focus:ring-offset-0">
+                    <span class="text-xs text-slate-600 dark:text-slate-300 font-medium">{{ __('Remember me') }}</span>
+                </label>
+            </div>
+
             <!-- Submit Button -->
             <button type="submit" 
                     class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-500 text-white font-bold text-sm tracking-wide glow-btn transition-all active:scale-98 flex items-center justify-center gap-2 shadow-lg mt-2">
