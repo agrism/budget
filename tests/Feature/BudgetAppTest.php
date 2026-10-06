@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\BudgetAppSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -520,6 +521,53 @@ class BudgetAppTest extends TestCase
 
         $segments = collect($apiResponse->json('data.donut_segments'));
         $this->assertTrue($segments->contains('name', 'Custom Pet Care'));
+    }
+
+    public function test_transaction_date_formatting_removes_midnight_time_and_localizes_lv_month(): void
+    {
+        $account = Account::where('user_id', $this->user->id)->first();
+        
+        $currentYear = now()->year;
+
+        // 1. Transaction with midnight 00:00:00 in October
+        $txMidnight = Transaction::create([
+            'user_id' => $this->user->id,
+            'account_id' => $account->id,
+            'type' => 'expense',
+            'amount' => 15.74,
+            'transacted_at' => "{$currentYear}-10-02 00:00:00",
+            'note' => 'Maxima, lasis, burkāni',
+        ]);
+
+        // 2. Transaction with specific time 14:35:00 in October
+        $txWithTime = Transaction::create([
+            'user_id' => $this->user->id,
+            'account_id' => $account->id,
+            'type' => 'expense',
+            'amount' => 7.53,
+            'transacted_at' => "{$currentYear}-10-05 14:35:00",
+            'note' => 'Lidl vistas fileja',
+        ]);
+
+        // Check LV locale
+        $this->assertEquals('Okt 02', $txMidnight->formatTransactedAt('lv'));
+        $this->assertStringNotContainsString('00:00', $txMidnight->formatTransactedAt('lv'));
+        $this->assertEquals('Okt 05, 14:35', $txWithTime->formatTransactedAt('lv'));
+
+        // Check EN locale
+        $this->assertEquals('Oct 02', $txMidnight->formatTransactedAt('en'));
+        $this->assertStringNotContainsString('00:00', $txMidnight->formatTransactedAt('en'));
+        $this->assertEquals('Oct 05, 14:35', $txWithTime->formatTransactedAt('en'));
+
+        // Check dashboard rendering with session locale 'lv'
+        $response = $this->actingAs($this->user)
+            ->withSession(['locale' => 'lv'])
+            ->get('/dashboard/recent-transactions');
+
+        $response->assertStatus(200);
+        $response->assertSee('Okt 02');
+        $response->assertSee('Okt 05, 14:35');
+        $response->assertDontSee('Oct 02, 00:00');
     }
 }
 

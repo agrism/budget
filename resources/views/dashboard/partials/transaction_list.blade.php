@@ -38,7 +38,7 @@
                             </span>
                         @endif
                         <span class="text-[11px] text-slate-500 dark:text-slate-400">
-                            {{ \Carbon\Carbon::parse($tx->transacted_at)->format('M d, H:i') }}
+                            {{ $tx->formatted_date }}
                         </span>
                     </div>
                 </div>

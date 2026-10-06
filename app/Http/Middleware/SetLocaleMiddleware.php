@@ -30,6 +30,7 @@ class SetLocaleMiddleware
 
         if (in_array($locale, $supportedLocales)) {
             App::setLocale($locale);
+            \Carbon\Carbon::setLocale($locale);
         }
 
         return $next($request);

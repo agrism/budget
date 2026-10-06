@@ -121,7 +121,7 @@
             <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-[#141926] border border-slate-100 dark:border-[#20293d]">
                 <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">{{ __('Date') }}</span>
                 <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                    {{ \Carbon\Carbon::parse($transaction->transacted_at)->format('Y-m-d') }}
+                    {{ $transaction->formatted_date }}
                 </span>
             </div>
 

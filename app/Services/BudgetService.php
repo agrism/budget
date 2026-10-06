@@ -10,6 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class BudgetService
 {
@@ -135,7 +136,7 @@ class BudgetService
 
         return [
             'month' => $month,
-            'formatted_month' => $startOfMonth->format('F Y'),
+            'formatted_month' => Str::ucfirst($startOfMonth->locale(app()->getLocale())->translatedFormat('F Y')),
             'currency' => $currency,
             'currency_symbol' => $currencySymbol,
             'total_balance' => $totalBalance,
@@ -255,7 +256,7 @@ class BudgetService
 
         return [
             'month' => $month,
-            'formatted_month' => $startOfMonth->format('F Y'),
+            'formatted_month' => Str::ucfirst($startOfMonth->locale(app()->getLocale())->translatedFormat('F Y')),
             'prev_month' => $startOfMonth->copy()->subMonth()->format('Y-m'),
             'next_month' => $startOfMonth->copy()->addMonth()->format('Y-m'),
             'currency' => $currency,
@@ -406,9 +407,21 @@ class BudgetService
                 ->whereBetween('transacted_at', [$mStart, $mEnd])
                 ->sum('amount');
 
+            $locale = app()->getLocale();
+            if ($locale === 'lv') {
+                $lvMonths = [
+                    1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+                    5 => 'Mai', 6 => 'Jūn', 7 => 'Jūl', 8 => 'Aug',
+                    9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Dec',
+                ];
+                $trendLabel = $lvMonths[(int) $m->format('n')] ?? $m->format('M');
+            } else {
+                $trendLabel = Str::ucfirst(rtrim($m->locale($locale)->translatedFormat('M'), '.'));
+            }
+
             $monthlyTrends[] = [
                 'month' => $m->format('Y-m'),
-                'label' => $m->format('M'),
+                'label' => $trendLabel,
                 'income' => $inc,
                 'expense' => $exp,
                 'savings' => max(0, $inc - $exp),
@@ -417,7 +430,7 @@ class BudgetService
 
         return [
             'month' => $month,
-            'formatted_month' => $startOfMonth->format('F Y'),
+            'formatted_month' => Str::ucfirst($startOfMonth->locale(app()->getLocale())->translatedFormat('F Y')),
             'prev_month' => $startOfMonth->copy()->subMonth()->format('Y-m'),
             'next_month' => $startOfMonth->copy()->addMonth()->format('Y-m'),
             'currency' => $currency,
