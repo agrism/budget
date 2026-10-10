@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Budget;
 use App\Models\Category;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\BudgetService;
 use Carbon\Carbon;
@@ -48,6 +49,77 @@ class CategoryController extends Controller
         }
 
         return view('categories.index', compact('categories', 'currencySymbol', 'currentMonth'));
+    }
+
+    public function show(Category $category, Request $request)
+    {
+        $user = $this->getActiveUser();
+        if ($category->user_id && $category->user_id !== $user->id) {
+            abort(403);
+        }
+
+        $transactions = Transaction::where('user_id', $user->id)
+            ->where('category_id', $category->id)
+            ->with(['category', 'account'])
+            ->orderBy('transacted_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
+        if ($request->header('HX-Request') && $request->has('feed_only')) {
+            return view('categories.partials.transactions_feed', compact('category', 'transactions'));
+        }
+
+        $currentMonth = Carbon::now()->format('Y-m');
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $thisMonthSpent = (float) Transaction::where('user_id', $user->id)
+            ->where('category_id', $category->id)
+            ->whereBetween('transacted_at', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        $allTimeSpent = (float) Transaction::where('user_id', $user->id)
+            ->where('category_id', $category->id)
+            ->sum('amount');
+
+        $budget = $category->budgets()
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)->orWhereNull('user_id');
+            })
+            ->where('period_month', $currentMonth)
+            ->first();
+
+        $monthlyLimit = $budget ? (float) $budget->monthly_limit : null;
+
+        $currency = $user->currency ?: 'EUR';
+        $currencySymbol = BudgetService::currencySymbol($currency);
+
+        return view('categories.show', compact(
+            'category',
+            'transactions',
+            'thisMonthSpent',
+            'allTimeSpent',
+            'monthlyLimit',
+            'currencySymbol',
+            'currentMonth'
+        ));
+    }
+
+    public function transactionsFeed(Category $category, Request $request)
+    {
+        $user = $this->getActiveUser();
+        if ($category->user_id && $category->user_id !== $user->id) {
+            abort(403);
+        }
+
+        $transactions = Transaction::where('user_id', $user->id)
+            ->where('category_id', $category->id)
+            ->with(['category', 'account'])
+            ->orderBy('transacted_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
+        return view('categories.partials.transactions_feed', compact('category', 'transactions'));
     }
 
     public function create(Request $request)

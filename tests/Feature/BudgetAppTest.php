@@ -401,6 +401,40 @@ class BudgetAppTest extends TestCase
         ]);
     }
 
+    public function test_category_show_and_transactions_feed(): void
+    {
+        $this->actingAs($this->user);
+        $category = $this->user->categories()->first();
+        $this->assertNotNull($category);
+
+        // Test full page show
+        $response = $this->get(route('categories.show', $category));
+        $response->assertStatus(200);
+        $response->assertSee('Category Transactions');
+        $response->assertSee($category->name);
+
+        // Test transactions feed pagination endpoint
+        $response = $this->withHeaders(['HX-Request' => 'true'])->get(route('categories.transactions_feed', ['category' => $category, 'page' => 1]));
+        $response->assertStatus(200);
+
+        // Test dashboard links to category show page
+        $dashboardResponse = $this->get('/');
+        $dashboardResponse->assertStatus(200);
+        $dashboardResponse->assertSee(route('categories.show', $category));
+
+        // Test other user's category cannot be accessed
+        $otherUser = User::factory()->create();
+        $otherCategory = Category::create([
+            'user_id' => $otherUser->id,
+            'name' => 'Secret Category',
+            'type' => 'expense',
+            'icon' => 'lock',
+            'color' => '#000000',
+        ]);
+        $forbiddenResponse = $this->get(route('categories.show', $otherCategory));
+        $forbiddenResponse->assertStatus(403);
+    }
+
     public function test_stage2_flutter_api_categories_endpoint(): void
     {
         $this->actingAs($this->user);

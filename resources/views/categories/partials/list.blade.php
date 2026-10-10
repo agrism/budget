@@ -52,7 +52,7 @@
             <div x-show="filterType === 'all' || filterType === '{{ $cat->type }}'"
                  class="app-card rounded-2xl p-3.5 flex items-center justify-between transition-all hover:border-slate-300 dark:hover:border-slate-700 group">
                 
-                <div class="flex items-center gap-3 min-w-0">
+                <a href="{{ route('categories.show', $cat) }}" class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer">
                     <!-- Icon -->
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform group-hover:scale-105"
                          style="background-color: {{ $cat->color }}20; color: {{ $cat->color }};">
@@ -75,10 +75,10 @@
                             @endif
                         </div>
                     </div>
-                </div>
+                </a>
 
-                <!-- Edit Action -->
-                <div class="flex items-center gap-1">
+                <!-- Edit & Open Actions -->
+                <div class="flex items-center gap-1 pl-2">
                     <button @click="modalOpen = true"
                             hx-get="{{ route('categories.edit', $cat->id) }}"
                             hx-target="#modal-body"
@@ -89,6 +89,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                     </button>
+                    <a href="{{ route('categories.show', $cat) }}"
+                       class="p-2 rounded-xl text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                       title="{{ __('Category Transactions') }}">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
                 </div>
             </div>
         @empty

@@ -125,5 +125,10 @@
     "Categories with activity": "Categories with activity",
     "Total": "Total",
     "of total": "of total",
-    "Categories count": "Categories count"
+    "Categories count": "Categories count",
+    "Category Transactions": "Category Transactions",
+    "No transactions in this category yet": "No transactions in this category yet",
+    "Spent this month": "Spent this month",
+    "Income this month": "Income this month",
+    "Back": "Back"
 }

@@ -140,5 +140,10 @@
     "Account Details": "Konta informācija",
     "Transaction updated successfully!": "Darījums veiksmīgi atjaunināts!",
     "Transaction updated!": "Darījums atjaunināts!",
-    "Remember me": "Atcerēties mani"
+    "Remember me": "Atcerēties mani",
+    "Category Transactions": "Kategorijas darījumi",
+    "No transactions in this category yet": "Šajā kategorijā vēl nav darījumu",
+    "Spent this month": "Iztērēts šajā mēnesī",
+    "Income this month": "Ienākumi šajā mēnesī",
+    "Back": "Atpakaļ"
 }

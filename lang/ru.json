@@ -126,5 +126,10 @@
     "Total": "Всего",
     "of total": "от общего",
     "Categories count": "Количество категорий",
-    "Remember me": "Запомнить меня"
+    "Remember me": "Запомнить меня",
+    "Category Transactions": "Транзакции категории",
+    "No transactions in this category yet": "В этой категории пока нет транзакций",
+    "Spent this month": "Потрачено в этом месяце",
+    "Income this month": "Доход в этом месяце",
+    "Back": "Назад"
 }
