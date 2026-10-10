@@ -18,6 +18,8 @@
     <div class="space-y-3">
         @forelse($accounts as $acc)
             <a href="{{ route('accounts.show', $acc) }}"
+               onclick="window.showPageLoader('{{ addslashes($acc->name) }}')"
+               data-loader-title="{{ $acc->name }}"
                class="block app-card-glow rounded-3xl p-4 transition-all hover:border-slate-300 dark:hover:border-slate-600/60 relative overflow-hidden cursor-pointer active:scale-98 group">
                 <div class="flex items-center justify-between mb-1">
                     <div class="flex items-center gap-3">

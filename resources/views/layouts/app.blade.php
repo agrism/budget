@@ -124,6 +124,17 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Global top progress bar animation */
+        #global-progress-bar {
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #10b981);
+            background-size: 200% 100%;
+            animation: progressShimmer 1.8s infinite linear;
+        }
+        @keyframes progressShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body class="flex justify-center items-start min-h-screen antialiased bg-slate-100 dark:bg-[#06080d] text-slate-800 dark:text-slate-100 selection:bg-brand-500 selection:text-white transition-colors duration-200"
@@ -147,6 +158,23 @@
     <!-- Mobile Frame Container -->
     <div class="w-full max-w-[430px] min-h-screen bg-white dark:bg-[#0c1017] border-x border-slate-200 dark:border-[#1a2233] flex flex-col relative shadow-xl overflow-x-hidden @auth pb-24 @else pb-6 @endauth transition-colors duration-200">
         
+        <!-- Global Top Progress Bar -->
+        <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[3px] z-[70] pointer-events-none overflow-hidden">
+            <div id="global-progress-bar" class="h-full w-0 opacity-0 shadow-[0_0_10px_rgba(99,102,241,0.9)]"></div>
+        </div>
+
+        <!-- Global Floating Loading Badge -->
+        <div id="global-page-loader" 
+             class="fixed top-3.5 left-1/2 -translate-x-1/2 z-[70] pointer-events-none transition-all duration-200 opacity-0 -translate-y-4">
+            <div class="px-3.5 py-1.5 rounded-full bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 text-xs font-bold shadow-2xl backdrop-blur-md flex items-center gap-2 border border-white/20 dark:border-black/10">
+                <svg class="animate-spin h-3.5 w-3.5 text-brand-400 dark:text-brand-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span id="global-page-loader-text">{{ __('Loading...') }}</span>
+            </div>
+        </div>
+
         <!-- Toast Notification -->
         <div x-show="toastMsg" 
              x-transition:enter="transition ease-out duration-300 transform"
@@ -425,7 +453,77 @@
 
     </div>
 
-    @stack('scripts')
+    <!-- Global Page Loader JS -->
+    <script>
+        window.showPageLoader = function(label) {
+            const bar = document.getElementById('global-progress-bar');
+            const badge = document.getElementById('global-page-loader');
+            const text = document.getElementById('global-page-loader-text');
+            if (bar) {
+                bar.style.width = '70%';
+                bar.classList.remove('opacity-0');
+                bar.classList.add('opacity-100');
+            }
+            if (badge) {
+                if (text) {
+                    text.textContent = label ? ('{{ __('Loading...') }} ' + label) : '{{ __('Loading...') }}';
+                }
+                badge.classList.remove('opacity-0', '-translate-y-4');
+                badge.classList.add('opacity-100', 'translate-y-0');
+            }
+        };
+
+        window.hidePageLoader = function() {
+            const bar = document.getElementById('global-progress-bar');
+            const badge = document.getElementById('global-page-loader');
+            if (bar) {
+                bar.style.width = '100%';
+                setTimeout(() => {
+                    bar.classList.remove('opacity-100');
+                    bar.classList.add('opacity-0');
+                    setTimeout(() => { bar.style.width = '0%'; }, 250);
+                }, 150);
+            }
+            if (badge) {
+                badge.classList.remove('opacity-100', 'translate-y-0');
+                badge.classList.add('opacity-0', '-translate-y-4');
+            }
+        };
+
+        // Intercept standard link clicks for immediate tactile feedback
+        document.addEventListener('click', function(e) {
+            const a = e.target.closest('a');
+            if (!a) return;
+            const href = a.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('javascript:') || a.target === '_blank' || a.hasAttribute('download')) {
+                return;
+            }
+            // If already handled by custom click or HTMX modal, skip
+            if (a.hasAttribute('hx-get') || a.hasAttribute('hx-post') || a.getAttribute('@click')) {
+                return;
+            }
+            const label = a.getAttribute('data-loader-title') || a.innerText?.trim().slice(0, 20) || '';
+            window.showPageLoader(label);
+        });
+
+        // HTMX Loading lifecycle
+        document.addEventListener('htmx:beforeRequest', function(e) {
+            const bar = document.getElementById('global-progress-bar');
+            if (bar) {
+                bar.style.width = '65%';
+                bar.classList.remove('opacity-0');
+                bar.classList.add('opacity-100');
+            }
+        });
+
+        document.addEventListener('htmx:afterRequest', function(e) {
+            window.hidePageLoader();
+        });
+
+        window.addEventListener('pageshow', function() {
+            window.hidePageLoader();
+        });
+    </script>
 
     <!-- Service Worker Registration -->
     <script>

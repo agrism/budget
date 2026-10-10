@@ -52,11 +52,23 @@
             <div x-show="filterType === 'all' || filterType === '{{ $cat->type }}'"
                  class="app-card rounded-2xl p-3.5 flex items-center justify-between transition-all hover:border-slate-300 dark:hover:border-slate-700 group">
                 
-                <a href="{{ route('categories.show', $cat) }}" class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer">
+                <a href="{{ route('categories.show', $cat) }}" 
+                   x-data="{ loading: false }"
+                   @click="loading = true; window.showPageLoader('{{ addslashes($cat->name) }}')"
+                   data-loader-title="{{ $cat->name }}"
+                   class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer">
                     <!-- Icon -->
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform group-hover:scale-105"
                          style="background-color: {{ $cat->color }}20; color: {{ $cat->color }};">
-                        <x-category-icon :icon="$cat->icon" class="w-5 h-5" />
+                        <template x-if="!loading">
+                            <x-category-icon :icon="$cat->icon" class="w-5 h-5" />
+                        </template>
+                        <template x-if="loading">
+                            <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                        </template>
                     </div>
 
                     <!-- Details -->
@@ -68,7 +80,8 @@
                             </span>
                         </div>
                         <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                            <span>{{ $cat->transactions_count }} {{ __('Recent Transactions') }}</span>
+                            <span x-show="!loading">{{ $cat->transactions_count }} {{ __('Recent Transactions') }}</span>
+                            <span x-show="loading" class="font-bold text-brand-600 dark:text-brand-400" style="display: none;">{{ __('Loading...') }}</span>
                             @if($limit !== null && $cat->type === 'expense')
                                 <span>•</span>
                                 <span class="font-medium text-brand-600 dark:text-brand-400">{{ __('Budget') }}: {{ $currencySymbol }}{{ number_format($limit, 0) }}/mo</span>
