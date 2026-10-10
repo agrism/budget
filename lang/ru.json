@@ -131,5 +131,20 @@
     "No transactions in this category yet": "В этой категории пока нет транзакций",
     "Spent this month": "Потрачено в этом месяце",
     "Income this month": "Доход в этом месяце",
-    "Back": "Назад"
+    "Back": "Назад",
+    "Dashboard Sections": "Блоки главного экрана",
+    "Enable or disable sections and adjust their order using the arrows.": "Включайте или отключайте разделы и меняйте их порядок с помощью стрелок.",
+    "Reset to Default": "Сбросить по умолчанию",
+    "Settings saved successfully!": "Настройки успешно сохранены!",
+    "Settings reset to default!": "Настройки сброшены на значения по умолчанию!",
+    "Total Balance & Budget": "Общий баланс и бюджет",
+    "Total balance, target savings and monthly budget status": "Общий баланс, цель накоплений и статус бюджета",
+    "Safe to spend today, daily allowance and progress bar": "Безопасно потратить сегодня, дневной лимит и прогресс",
+    "Horizontal categories spending scroll and shortcuts": "Горизонтальная лента категорий и быстрый доступ",
+    "Search bar, filter pills and recent transactions list": "Поиск, фильтры и список недавних транзакций",
+    "Move Up": "Переместить вверх",
+    "Move Down": "Переместить вниз",
+    "Saved": "Сохранено",
+    "Saving...": "Сохранение...",
+    "Other Preferences": "Другие настройки"
 }

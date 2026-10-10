@@ -7,6 +7,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SavingsController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -64,4 +65,9 @@ Route::middleware('auth')->group(function () {
 
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+    // Settings
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings/dashboard-sections', [SettingsController::class, 'updateDashboardSections'])->name('settings.dashboard_sections.update');
+    Route::post('/settings/dashboard-sections/reset', [SettingsController::class, 'resetDashboardSections'])->name('settings.dashboard_sections.reset');
 });

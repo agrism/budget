@@ -27,12 +27,13 @@ class DashboardController extends Controller
         $user = $this->getActiveUser();
         $month = $request->get('month');
         $summary = $this->budgetService->getDashboardSummary($user, $month);
+        $dashboardSections = $user->getDashboardSections();
 
         if ($request->header('HX-Request')) {
-            return view('dashboard.partials.content', compact('summary'));
+            return view('dashboard.partials.content', compact('summary', 'dashboardSections'));
         }
 
-        return view('dashboard.index', compact('summary'));
+        return view('dashboard.index', compact('summary', 'dashboardSections'));
     }
 
     public function balanceCard(Request $request)

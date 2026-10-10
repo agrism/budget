@@ -130,5 +130,20 @@
     "No transactions in this category yet": "No transactions in this category yet",
     "Spent this month": "Spent this month",
     "Income this month": "Income this month",
-    "Back": "Back"
+    "Back": "Back",
+    "Dashboard Sections": "Dashboard Sections",
+    "Enable or disable sections and adjust their order using the arrows.": "Enable or disable sections and adjust their order using the arrows.",
+    "Reset to Default": "Reset to Default",
+    "Settings saved successfully!": "Settings saved successfully!",
+    "Settings reset to default!": "Settings reset to default!",
+    "Total Balance & Budget": "Total Balance & Budget",
+    "Total balance, target savings and monthly budget status": "Total balance, target savings and monthly budget status",
+    "Safe to spend today, daily allowance and progress bar": "Safe to spend today, daily allowance and progress bar",
+    "Horizontal categories spending scroll and shortcuts": "Horizontal categories spending scroll and shortcuts",
+    "Search bar, filter pills and recent transactions list": "Search bar, filter pills and recent transactions list",
+    "Move Up": "Move Up",
+    "Move Down": "Move Down",
+    "Saved": "Saved",
+    "Saving...": "Saving...",
+    "Other Preferences": "Other Preferences"
 }

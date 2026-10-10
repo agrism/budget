@@ -41,6 +41,7 @@ class BudgetAppTest extends TestCase
         $this->get('/accounts')->assertRedirect(route('login'));
         $this->get('/categories')->assertRedirect(route('login'));
         $this->get('/analytics')->assertRedirect(route('login'));
+        $this->get('/settings')->assertRedirect(route('login'));
     }
 
     public function test_unauthenticated_api_requests_return_401(): void
@@ -433,6 +434,56 @@ class BudgetAppTest extends TestCase
         ]);
         $forbiddenResponse = $this->get(route('categories.show', $otherCategory));
         $forbiddenResponse->assertStatus(403);
+    }
+
+    public function test_settings_page_and_dashboard_sections_customization(): void
+    {
+        $this->actingAs($this->user);
+
+        // 1. Settings page render
+        $response = $this->get('/settings');
+        $response->assertStatus(200);
+        $response->assertSee('Dashboard Sections');
+
+        // 2. Update sections (disable daily_limit, reorder recent_transactions to first)
+        $newSections = [
+            ['id' => 'recent_transactions', 'enabled' => true],
+            ['id' => 'balance_card', 'enabled' => true],
+            ['id' => 'top_categories', 'enabled' => true],
+            ['id' => 'daily_limit', 'enabled' => false],
+        ];
+
+        $updateResponse = $this->withHeaders(['HX-Request' => 'true'])
+            ->post('/settings/dashboard-sections', [
+                'sections' => $newSections,
+            ]);
+        $updateResponse->assertStatus(200);
+        $updateResponse->assertHeader('HX-Trigger');
+
+        $this->user->refresh();
+        $this->assertFalse($this->user->getDashboardSections()[3]['enabled']);
+        $this->assertEquals('daily_limit', $this->user->getDashboardSections()[3]['id']);
+        $this->assertEquals('recent_transactions', $this->user->getDashboardSections()[0]['id']);
+
+        // 3. Dashboard reflects the changes: daily_limit is disabled
+        $dashboardResponse = $this->get('/');
+        $dashboardResponse->assertStatus(200);
+        $dashboardResponse->assertDontSee('Safe to spend today');
+        $dashboardResponse->assertSee('Recent Transactions');
+
+        // 4. Reset to default
+        $resetResponse = $this->withHeaders(['HX-Request' => 'true'])
+            ->post('/settings/dashboard-sections/reset');
+        $resetResponse->assertStatus(200);
+        $resetResponse->assertHeader('HX-Trigger');
+
+        $this->user->refresh();
+        $this->assertNull($this->user->dashboard_sections);
+
+        // Dashboard now shows all sections again
+        $resetDashboardResponse = $this->get('/');
+        $resetDashboardResponse->assertStatus(200);
+        $resetDashboardResponse->assertSee('Safe to spend today');
     }
 
     public function test_stage2_flutter_api_categories_endpoint(): void
