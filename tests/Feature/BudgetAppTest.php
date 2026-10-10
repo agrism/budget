@@ -654,6 +654,15 @@ class BudgetAppTest extends TestCase
         $response->assertSee('Okt 05, 14:35');
         $response->assertDontSee('Oct 02, 00:00');
     }
+
+    public function test_login_screen_renders_video_tutorial_button(): void
+    {
+        $response = $this->withSession(['locale' => 'lv'])->get('/login');
+        $response->assertStatus(200);
+        $response->assertSee('Skatīties video pamācību');
+        $response->assertSee('videos/tutorial.mp4');
+        $this->assertFileExists(public_path('videos/tutorial.mp4'));
+    }
 }
 
 
