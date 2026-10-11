@@ -149,10 +149,15 @@
       }"
       @close-modal.window="modalOpen = false; settingsOpen = false"
       @show-toast.window="showToast($event.detail)"
-      @htmx:after-request="if($event.detail.successful && $event.detail.headers['hx-trigger']) { 
-          const triggers = JSON.parse($event.detail.headers['hx-trigger'] || '{}');
-          if (triggers.closeModal) modalOpen = false;
-          if (triggers.showToast) showToast(triggers.showToast);
+      @htmx:after-request="if ($event.detail && $event.detail.successful && $event.detail.xhr) { 
+          const trg = $event.detail.xhr.getResponseHeader('HX-Trigger');
+          if (trg) {
+              try {
+                  const triggers = JSON.parse(trg);
+                  if (triggers.closeModal) modalOpen = false;
+                  if (triggers.showToast) showToast(triggers.showToast);
+              } catch(e) {}
+          }
       }">
 
     <!-- Mobile Frame Container -->

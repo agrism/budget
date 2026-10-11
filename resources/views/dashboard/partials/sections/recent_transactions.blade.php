@@ -15,6 +15,7 @@
                    hx-get="{{ route('dashboard.recent_transactions') }}"
                    hx-trigger="keyup changed delay:300ms, search"
                    hx-target="#transaction-feed-container"
+                   hx-swap="innerHTML"
                    hx-include="#recent-tx-type-input"
                    hx-indicator="#transaction-feed-container"
                    class="w-full bg-slate-50 dark:bg-[#141926] border border-slate-200 dark:border-[#232d42] rounded-2xl py-2.5 pl-10 pr-4 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-sm">
@@ -36,6 +37,7 @@
                     hx-include="#transaction-search-input"
                     hx-indicator="#transaction-feed-container"
                     hx-target="#transaction-feed-container"
+                    hx-swap="innerHTML"
                     :class="activeTab === 'all' ? 'bg-brand-600 text-white font-bold shadow-sm' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600'"
                     class="px-4 py-1.5 rounded-full transition-all text-xs whitespace-nowrap">
                 {{ __('All') }}@if($counts) ({{ $counts['all'] }})@endif
@@ -46,6 +48,7 @@
                     hx-include="#transaction-search-input"
                     hx-indicator="#transaction-feed-container"
                     hx-target="#transaction-feed-container"
+                    hx-swap="innerHTML"
                     :class="activeTab === 'expense' ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white font-bold shadow-sm' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600'"
                     class="px-4 py-1.5 rounded-full transition-all text-xs whitespace-nowrap">
                 {{ __('Expenses') }}@if($counts) ({{ $counts['expense'] }})@endif
@@ -56,6 +59,7 @@
                     hx-include="#transaction-search-input"
                     hx-indicator="#transaction-feed-container"
                     hx-target="#transaction-feed-container"
+                    hx-swap="innerHTML"
                     :class="activeTab === 'income' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-sm' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600'"
                     class="px-4 py-1.5 rounded-full transition-all text-xs whitespace-nowrap">
                 {{ __('Income') }}@if($counts) ({{ $counts['income'] }})@endif
@@ -63,11 +67,8 @@
         </div>
     </div>
 
-    <!-- Reactive Transaction Feed (Auto-refreshes on transaction change) -->
+    <!-- Reactive Transaction Feed -->
     <div id="transaction-feed-container"
-         hx-get="{{ route('dashboard.recent_transactions') }}"
-         hx-trigger="transactionCreated from:window, transactionUpdated from:window, transactionDeleted from:window"
-         hx-swap="innerHTML"
          class="transition-opacity duration-150 [&.htmx-request]:opacity-50">
         @include('dashboard.partials.transaction_list', ['transactions' => $summary['recent_transactions'], 'type' => 'all'])
     </div>
