@@ -154,5 +154,6 @@
     "Close": "Закрыть",
     "You have not recorded any income transactions yet.": "Вы еще не добавили ни одной транзакции дохода.",
     "Add income": "Добавить доход",
-    "Add expense": "Добавить расход"
+    "Add expense": "Добавить расход",
+    "Category list with spending, budgets, and percentages": "Список категорий с расходами, бюджетами и процентами"
 }

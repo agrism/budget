@@ -78,12 +78,13 @@ class BudgetService
             ->where('type', 'expense')
             ->orderBy('sort_order')
             ->get()
-            ->map(function ($cat) use ($categorySpending, $budgets) {
+            ->map(function ($cat) use ($categorySpending, $budgets, $monthlyExpense) {
                 $spent = (float) ($categorySpending[$cat->id] ?? 0);
                 $budget = $budgets->firstWhere('category_id', $cat->id);
                 $limit = $budget ? (float) $budget->monthly_limit : 0;
                 $percentage = $limit > 0 ? min(100, round(($spent / $limit) * 100)) : 0;
                 $isOver = $limit > 0 && $spent > $limit;
+                $sharePercentage = $monthlyExpense > 0 ? round(($spent / $monthlyExpense) * 100, 1) : 0;
 
                 return [
                     'id' => $cat->id,
@@ -93,6 +94,7 @@ class BudgetService
                     'spent' => $spent,
                     'limit' => $limit,
                     'percentage' => $percentage,
+                    'share_percentage' => $sharePercentage,
                     'is_over' => $isOver,
                 ];
             });

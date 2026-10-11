@@ -43,6 +43,13 @@ class SettingsController extends Controller
                 'icon' => 'squares',
                 'color' => '#f59e0b',
             ],
+            'category_breakdown' => [
+                'id' => 'category_breakdown',
+                'title' => __('Category Breakdown'),
+                'description' => __('Category list with spending, budgets, and percentages'),
+                'icon' => 'chart-bar',
+                'color' => '#8b5cf6',
+            ],
             'recent_transactions' => [
                 'id' => 'recent_transactions',
                 'title' => __('Recent Transactions'),
@@ -65,7 +72,7 @@ class SettingsController extends Controller
     public function updateDashboardSections(Request $request)
     {
         $user = $this->getActiveUser();
-        $validIds = ['balance_card', 'daily_limit', 'top_categories', 'recent_transactions'];
+        $validIds = ['balance_card', 'daily_limit', 'top_categories', 'category_breakdown', 'recent_transactions'];
 
         $rawSections = $request->input('sections', []);
         $cleaned = [];

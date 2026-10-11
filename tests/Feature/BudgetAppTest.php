@@ -673,7 +673,33 @@ class BudgetAppTest extends TestCase
         $response->assertSee('videos/tutorial.mp4');
         $this->assertFileExists(public_path('videos/tutorial.mp4'));
     }
+
+    public function test_category_breakdown_section_renders_and_links_to_category_transactions(): void
+    {
+        $this->actingAs($this->user);
+
+        // Fetch dashboard with Latvian locale
+        $response = $this->withSession(['locale' => 'lv'])->get('/');
+        $response->assertStatus(200);
+
+        // Check header elements
+        $response->assertSee('Sadalījums pa kategorijām');
+        $response->assertSee('Pārvaldīt');
+        $response->assertSee('Pievienot kategoriju');
+
+        // Check category links to category transactions show route
+        $category = $this->user->categories()->where('type', 'expense')->first();
+        $this->assertNotNull($category);
+
+        $response->assertSee(route('categories.show', $category));
+
+        // Visit the category show page directly
+        $showResponse = $this->get(route('categories.show', $category));
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee($category->name);
+    }
 }
+
 
 
 

@@ -5,7 +5,7 @@
 <div x-data="{ activeTab: 'all' }"
      id="dashboard-content-container"
      hx-get="{{ route('dashboard') }}"
-     hx-trigger="dashboardSectionsUpdated from:window, transactionCreated from:window, transactionUpdated from:window, transactionDeleted from:window, savingsTargetUpdated from:window"
+     hx-trigger="dashboardSectionsUpdated from:window, transactionCreated from:window, transactionUpdated from:window, transactionDeleted from:window, savingsTargetUpdated from:window, categoryCreated from:window, categoryUpdated from:window, categoryDeleted from:window, budgetUpdated from:window"
      hx-swap="outerHTML">
 
     @foreach($dashboardSections as $section)
@@ -16,6 +16,8 @@
                 @include('dashboard.partials.sections.daily_limit', ['summary' => $summary])
             @elseif($section['id'] === 'top_categories')
                 @include('dashboard.partials.sections.top_categories', ['summary' => $summary])
+            @elseif($section['id'] === 'category_breakdown')
+                @include('dashboard.partials.sections.category_breakdown', ['summary' => $summary])
             @elseif($section['id'] === 'recent_transactions')
                 @include('dashboard.partials.sections.recent_transactions', ['summary' => $summary])
             @endif

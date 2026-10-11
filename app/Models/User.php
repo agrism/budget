@@ -36,6 +36,7 @@ class User extends Authenticatable
         ['id' => 'balance_card', 'enabled' => true],
         ['id' => 'daily_limit', 'enabled' => true],
         ['id' => 'top_categories', 'enabled' => true],
+        ['id' => 'category_breakdown', 'enabled' => true],
         ['id' => 'recent_transactions', 'enabled' => true],
     ];
 
@@ -92,7 +93,11 @@ class User extends Authenticatable
         // Add any missing default sections
         foreach ($default as $d) {
             if (!in_array($d['id'], $savedIds, true)) {
-                $result[] = $d;
+                if ($d['id'] === 'category_breakdown' && !empty($result) && end($result)['id'] === 'recent_transactions') {
+                    array_splice($result, count($result) - 1, 0, [$d]);
+                } else {
+                    $result[] = $d;
+                }
             }
         }
 
