@@ -77,6 +77,16 @@ class BudgetAppTest extends TestCase
         $this->actingAs($this->user);
         $response = $this->withHeaders(['HX-Request' => 'true'])->get('/dashboard/recent-transactions?type=expense');
         $response->assertStatus(200);
+
+        $incomeResponse = $this->withHeaders(['HX-Request' => 'true'])->get('/dashboard/recent-transactions?type=income');
+        $incomeResponse->assertStatus(200);
+
+        // Delete income to test dedicated empty state
+        $this->user->transactions()->where('type', 'income')->delete();
+        $emptyIncome = $this->withHeaders(['HX-Request' => 'true'])->get('/dashboard/recent-transactions?type=income');
+        $emptyIncome->assertStatus(200);
+        $emptyIncome->assertSee('No income recorded in this period');
+        $emptyIncome->assertSee('Add income');
     }
 
     public function test_add_transaction_modal_htmx(): void

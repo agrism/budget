@@ -104,6 +104,12 @@ class BudgetService
             ->limit(10)
             ->get();
 
+        $transactionCounts = [
+            'all' => $user->transactions()->count(),
+            'expense' => $user->transactions()->where('type', 'expense')->count(),
+            'income' => $user->transactions()->where('type', 'income')->count(),
+        ];
+
         // Daily Spending Limit & Savings Target Calculations
         $savingsTargetPercentage = (float) ($user->savings_target_percentage ?? 20.0);
         $expectedIncome = $user->expected_monthly_income ? (float) $user->expected_monthly_income : null;
@@ -165,6 +171,7 @@ class BudgetService
             'categories' => $categories,
             'accounts' => $accounts,
             'recent_transactions' => $recentTransactions,
+            'transaction_counts' => $transactionCounts,
         ];
     }
 

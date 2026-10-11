@@ -67,6 +67,6 @@ class DashboardController extends Controller
 
         $transactions = $query->limit(20)->get();
 
-        return view('dashboard.partials.transaction_list', compact('transactions'));
+        return view('dashboard.partials.transaction_list', compact('transactions', 'type'));
     }
 }

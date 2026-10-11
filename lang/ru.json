@@ -151,5 +151,8 @@
     "Watch Video Tutorial (1 min)": "Смотреть видеоурок (1 мин)",
     "App Tutorial": "Обучение приложению",
     "Voiceover: Nils": "Озвучка: Нилс",
-    "Close": "Закрыть"
+    "Close": "Закрыть",
+    "You have not recorded any income transactions yet.": "Вы еще не добавили ни одной транзакции дохода.",
+    "Add income": "Добавить доход",
+    "Add expense": "Добавить расход"
 }

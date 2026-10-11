@@ -68,14 +68,35 @@
             <svg class="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <p class="text-sm font-medium">{{ __('No transactions found') }}</p>
-            <button @click="modalOpen = true"
-                    hx-get="{{ route('transactions.create') }}"
-                    hx-target="#modal-body"
-                    hx-swap="innerHTML"
-                    class="mt-3 inline-flex items-center text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline">
-                + {{ __('Add your first transaction') }}
-            </button>
+            @if(isset($type) && $type === 'income')
+                <p class="text-sm font-bold text-slate-800 dark:text-white">{{ __('No income recorded in this period') }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">{{ __('You have not recorded any income transactions yet.') }}</p>
+                <button @click="modalOpen = true"
+                        hx-get="{{ route('transactions.create', ['type' => 'income']) }}"
+                        hx-target="#modal-body"
+                        hx-swap="innerHTML"
+                        class="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-xs font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 transition-colors">
+                    + {{ __('Add income') }}
+                </button>
+            @elseif(isset($type) && $type === 'expense')
+                <p class="text-sm font-bold text-slate-800 dark:text-white">{{ __('No transactions found') }}</p>
+                <button @click="modalOpen = true"
+                        hx-get="{{ route('transactions.create', ['type' => 'expense']) }}"
+                        hx-target="#modal-body"
+                        hx-swap="innerHTML"
+                        class="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-xs font-bold text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 hover:bg-rose-100 transition-colors">
+                    + {{ __('Add expense') }}
+                </button>
+            @else
+                <p class="text-sm font-medium">{{ __('No transactions found') }}</p>
+                <button @click="modalOpen = true"
+                        hx-get="{{ route('transactions.create') }}"
+                        hx-target="#modal-body"
+                        hx-swap="innerHTML"
+                        class="mt-3 inline-flex items-center text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline">
+                    + {{ __('Add your first transaction') }}
+                </button>
+            @endif
         </div>
     @endforelse
 </div>
