@@ -216,6 +216,12 @@ class BudgetAppTest extends TestCase
         $responseAccount = $this->withHeaders(['HX-Request' => 'true'])
             ->get('/budgets?account_id=' . $account->id);
         $responseAccount->assertStatus(200);
+
+        // Test category filtering
+        $category = $this->user->categories()->first();
+        $responseCategory = $this->withHeaders(['HX-Request' => 'true'])
+            ->get('/budgets?category_id=' . $category->id);
+        $responseCategory->assertStatus(200);
     }
 
     public function test_analytics_page_can_be_rendered(): void

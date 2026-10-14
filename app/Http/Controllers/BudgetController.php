@@ -33,6 +33,7 @@ class BudgetController extends Controller
         $search = $request->get('search');
         $type = $request->get('type');
         $accountId = $request->get('account_id');
+        $categoryId = $request->get('category_id');
 
         $query = $user->transactions()
             ->with(['category', 'account', 'destinationAccount'])
@@ -62,16 +63,24 @@ class BudgetController extends Controller
             });
         }
 
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
         $transactions = $query->paginate(20)->withQueryString();
         $accounts = $user->accounts()->where('is_active', true)->get();
+        $categories = $user->categories()->orderBy('sort_order')->get();
 
-        // Transaction counts for filter pills (across all accounts or filtered account)
+        // Transaction counts for filter pills (across all accounts or filtered account/category)
         $baseCountQuery = $user->transactions();
         if ($accountId) {
             $baseCountQuery->where(function ($q) use ($accountId) {
                 $q->where('account_id', $accountId)
                   ->orWhere('destination_account_id', $accountId);
             });
+        }
+        if ($categoryId) {
+            $baseCountQuery->where('category_id', $categoryId);
         }
 
         $counts = [
@@ -90,17 +99,19 @@ class BudgetController extends Controller
         $currencySymbol = BudgetService::currencySymbol($currency);
 
         if ($request->header('HX-Request') && $request->has('feed_only')) {
-            return view('budgets.partials.transactions_feed', compact('transactions', 'currencySymbol', 'accountId'));
+            return view('budgets.partials.transactions_feed', compact('transactions', 'currencySymbol', 'accountId', 'categoryId'));
         }
 
         $viewData = compact(
             'transactions',
             'accounts',
+            'categories',
             'counts',
             'currencySymbol',
             'type',
             'search',
             'accountId',
+            'categoryId',
             'totalExpense',
             'totalIncome',
             'netSavings'

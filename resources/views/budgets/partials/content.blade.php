@@ -2,6 +2,7 @@
      x-data="{
         activeTab: '{{ $type ?? 'all' }}',
         selectedAccount: '{{ $accountId ?? '' }}',
+        selectedCategory: '{{ $categoryId ?? '' }}',
         searchQuery: '{{ $search ?? '' }}'
      }">
 
@@ -76,7 +77,7 @@
                    hx-trigger="keyup changed delay:300ms, search"
                    hx-target="#all-transactions-feed"
                    hx-swap="innerHTML"
-                   hx-include="#all-tx-type-input, #all-tx-account-input"
+                   hx-include="#all-tx-type-input, #all-tx-account-input, #all-tx-category-input"
                    hx-indicator="#all-transactions-feed"
                    class="w-full bg-slate-50 dark:bg-[#141926] border border-slate-200 dark:border-[#232d42] rounded-2xl py-2.5 pl-10 pr-4 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-xs">
             <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,12 +87,13 @@
 
         <input type="hidden" id="all-tx-type-input" name="type" :value="activeTab === 'all' ? '' : activeTab">
         <input type="hidden" id="all-tx-account-input" name="account_id" :value="selectedAccount">
+        <input type="hidden" id="all-tx-category-input" name="category_id" :value="selectedCategory">
 
         <!-- Type Filter Pills -->
         <div class="flex gap-2 overflow-x-auto no-scrollbar pb-0.5 text-xs">
             <button type="button"
                     @click="activeTab = 'all'"
-                    hx-get="{{ route('budgets.index', ['account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                    hx-get="{{ route('budgets.index', ['account_id' => $accountId ?? '', 'category_id' => $categoryId ?? '', 'search' => $search ?? '']) }}"
                     hx-target="#all-transactions-feed"
                     hx-swap="innerHTML"
                     :class="activeTab === 'all' ? 'bg-brand-600 text-white font-bold shadow-xs' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white'"
@@ -100,7 +102,7 @@
             </button>
             <button type="button"
                     @click="activeTab = 'expense'"
-                    hx-get="{{ route('budgets.index', ['type' => 'expense', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                    hx-get="{{ route('budgets.index', ['type' => 'expense', 'account_id' => $accountId ?? '', 'category_id' => $categoryId ?? '', 'search' => $search ?? '']) }}"
                     hx-target="#all-transactions-feed"
                     hx-swap="innerHTML"
                     :class="activeTab === 'expense' ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white font-bold shadow-xs' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white'"
@@ -109,7 +111,7 @@
             </button>
             <button type="button"
                     @click="activeTab = 'income'"
-                    hx-get="{{ route('budgets.index', ['type' => 'income', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                    hx-get="{{ route('budgets.index', ['type' => 'income', 'account_id' => $accountId ?? '', 'category_id' => $categoryId ?? '', 'search' => $search ?? '']) }}"
                     hx-target="#all-transactions-feed"
                     hx-swap="innerHTML"
                     :class="activeTab === 'income' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-xs' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white'"
@@ -119,7 +121,7 @@
             @if(!empty($counts['transfer']))
                 <button type="button"
                         @click="activeTab = 'transfer'"
-                        hx-get="{{ route('budgets.index', ['type' => 'transfer', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                        hx-get="{{ route('budgets.index', ['type' => 'transfer', 'account_id' => $accountId ?? '', 'category_id' => $categoryId ?? '', 'search' => $search ?? '']) }}"
                         hx-target="#all-transactions-feed"
                         hx-swap="innerHTML"
                         :class="activeTab === 'transfer' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white'"
@@ -131,11 +133,11 @@
 
         <!-- Accounts Horizontal Filter Pills -->
         @if(isset($accounts) && $accounts->count() > 1)
-            <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 text-[11px] items-center">
+            <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 text-[11px] items-center">
                 <span class="text-[10px] uppercase font-bold text-slate-400 mr-1 flex-shrink-0">{{ __('Accounts') }}:</span>
                 <button type="button"
                         @click="selectedAccount = ''"
-                        hx-get="{{ route('budgets.index', ['type' => $type ?? '', 'search' => $search ?? '']) }}"
+                        hx-get="{{ route('budgets.index', ['type' => $type ?? '', 'category_id' => $categoryId ?? '', 'search' => $search ?? '']) }}"
                         hx-target="#all-transactions-feed"
                         hx-swap="innerHTML"
                         :class="selectedAccount === '' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
@@ -145,7 +147,7 @@
                 @foreach($accounts as $acc)
                     <button type="button"
                             @click="selectedAccount = '{{ $acc->id }}'"
-                            hx-get="{{ route('budgets.index', ['account_id' => $acc->id, 'type' => $type ?? '', 'search' => $search ?? '']) }}"
+                            hx-get="{{ route('budgets.index', ['account_id' => $acc->id, 'type' => $type ?? '', 'category_id' => $categoryId ?? '', 'search' => $search ?? '']) }}"
                             hx-target="#all-transactions-feed"
                             hx-swap="innerHTML"
                             :class="selectedAccount === '{{ $acc->id }}' ? 'border-2 border-brand-500 font-bold' : 'border border-slate-200 dark:border-slate-800'"
@@ -156,14 +158,45 @@
                 @endforeach
             </div>
         @endif
+
+        <!-- Categories Horizontal Filter Pills -->
+        @if(isset($categories) && $categories->count() > 0)
+            <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 text-[11px] items-center">
+                <span class="text-[10px] uppercase font-bold text-slate-400 mr-1 flex-shrink-0">{{ __('Categories') }}:</span>
+                <button type="button"
+                        @click="selectedCategory = ''"
+                        hx-get="{{ route('budgets.index', ['type' => $type ?? '', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                        hx-target="#all-transactions-feed"
+                        hx-swap="innerHTML"
+                        :class="selectedCategory === '' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-2.5 py-1 rounded-xl transition-all whitespace-nowrap flex-shrink-0">
+                    {{ __('All Categories') }}
+                </button>
+                @foreach($categories as $cat)
+                    <button type="button"
+                            @click="selectedCategory = '{{ $cat->id }}'"
+                            hx-get="{{ route('budgets.index', ['category_id' => $cat->id, 'account_id' => $accountId ?? '', 'type' => $type ?? '', 'search' => $search ?? '']) }}"
+                            hx-target="#all-transactions-feed"
+                            hx-swap="innerHTML"
+                            :class="selectedCategory === '{{ $cat->id }}' ? 'border-2 border-brand-500 font-bold bg-brand-50/50 dark:bg-brand-500/10' : 'border border-slate-200 dark:border-slate-800'"
+                            class="px-2.5 py-1 rounded-xl bg-white dark:bg-[#141926] text-slate-700 dark:text-slate-300 transition-all whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
+                        <div class="w-3.5 h-3.5 rounded flex items-center justify-center flex-shrink-0"
+                             style="color: {{ $cat->color }};">
+                            <x-category-icon :icon="$cat->icon" class="w-3.5 h-3.5" />
+                        </div>
+                        <span>{{ $cat->name }}</span>
+                    </button>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     <!-- Feed Container -->
     <div id="all-transactions-feed"
          class="space-y-2.5 transition-opacity duration-150 [&.htmx-request]:opacity-50"
-         hx-get="{{ route('budgets.index', ['feed_only' => 1, 'type' => $type ?? '', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+         hx-get="{{ route('budgets.index', ['feed_only' => 1, 'type' => $type ?? '', 'account_id' => $accountId ?? '', 'category_id' => $categoryId ?? '', 'search' => $search ?? '']) }}"
          hx-trigger="transactionCreated from:window, transactionUpdated from:window, transactionDeleted from:window"
          hx-swap="innerHTML">
-        @include('budgets.partials.transactions_feed', ['transactions' => $transactions, 'currencySymbol' => $currencySymbol, 'accountId' => $accountId ?? null])
+        @include('budgets.partials.transactions_feed', ['transactions' => $transactions, 'currencySymbol' => $currencySymbol, 'accountId' => $accountId ?? null, 'categoryId' => $categoryId ?? null])
     </div>
 </div>
