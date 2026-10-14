@@ -52,16 +52,10 @@
                         </div>
 
                         <div class="flex-shrink-0">
-                            @if($cat['is_over'])
-                                <span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-[10px] font-bold">
-                                    {{ __('Over budget') }}
-                                </span>
-                            @else
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                    {{ $sym }}{{ number_format($cat['spent'], 0) }} / {{ $sym }}{{ number_format($cat['limit'], 0) }} 
-                                    <span class="text-slate-500 dark:text-slate-400">({{ $cat['pct_of_budget'] }}%)</span>
-                                </span>
-                            @endif
+                            <span class="text-xs font-semibold {{ $cat['is_over'] ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300' }}">
+                                {{ $sym }}{{ number_format($cat['spent'], 0) }} / {{ $sym }}{{ number_format($cat['limit'], 0) }} 
+                                <span class="{{ $cat['is_over'] ? 'text-rose-500 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400' }}">({{ $cat['pct_of_budget'] }}%)</span>
+                            </span>
                         </div>
                     </div>
 
