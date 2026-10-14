@@ -376,14 +376,13 @@
                     <span class="text-[10px]">{{ __('Home') }}</span>
                 </a>
 
-                <!-- Budgets Tab -->
+                <!-- Transactions Tab -->
                 <a href="{{ route('budgets.index') }}" 
                    class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all {{ request()->routeIs('budgets.*') ? 'text-brand-600 dark:text-brand-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                     </svg>
-                    <span class="text-[10px]">{{ __('Budgets') }}</span>
+                    <span class="text-[10px]">{{ __('Transactions') }}</span>
                 </a>
 
                 <!-- Floating Quick Add Button (+) -->

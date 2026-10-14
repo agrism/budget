@@ -189,6 +189,7 @@ class BudgetAppTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Visi darījumi');
         $response->assertSee('reģistrēti darījumi');
+        $response->assertSee('Transakcijas');
 
         // Check that user's transactions are visible in the feed
         $tx = $this->user->transactions()->first();
