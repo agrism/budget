@@ -154,5 +154,10 @@
     "You have not recorded any income transactions yet.": "You have not recorded any income transactions yet.",
     "Add income": "Add income",
     "Add expense": "Add expense",
-    "Category list with spending, budgets, and percentages": "Category list with spending, budgets, and percentages"
+    "Category list with spending, budgets, and percentages": "Category list with spending, budgets, and percentages",
+    "All Transactions": "All Transactions",
+    "All Accounts": "All Accounts",
+    "Transfers": "Transfers",
+    "Net Balance": "Net Balance",
+    "transactions recorded": "transactions recorded"
 }

@@ -185,10 +185,37 @@ class BudgetAppTest extends TestCase
     public function test_budgets_page_can_be_rendered(): void
     {
         $this->actingAs($this->user);
-        $response = $this->get('/budgets');
+        $response = $this->withSession(['locale' => 'lv'])->get('/budgets');
         $response->assertStatus(200);
-        $response->assertSee('Budgets', false);
-        $response->assertSee('Total Monthly Budget');
+        $response->assertSee('Visi darījumi');
+        $response->assertSee('reģistrēti darījumi');
+
+        // Check that user's transactions are visible in the feed
+        $tx = $this->user->transactions()->first();
+        if ($tx && $tx->note) {
+            $response->assertSee($tx->note);
+        }
+    }
+
+    public function test_budgets_tab_transactions_filtering_and_feed_only_htmx(): void
+    {
+        $this->actingAs($this->user);
+
+        // Test feed_only HTMX request
+        $response = $this->withHeaders(['HX-Request' => 'true'])
+            ->get('/budgets?feed_only=1');
+        $response->assertStatus(200);
+
+        // Test type filtering
+        $responseExpense = $this->withHeaders(['HX-Request' => 'true'])
+            ->get('/budgets?type=expense');
+        $responseExpense->assertStatus(200);
+
+        // Test account filtering
+        $account = $this->user->accounts()->first();
+        $responseAccount = $this->withHeaders(['HX-Request' => 'true'])
+            ->get('/budgets?account_id=' . $account->id);
+        $responseAccount->assertStatus(200);
     }
 
     public function test_analytics_page_can_be_rendered(): void

@@ -1,210 +1,169 @@
-@php
-    $sym = $data['currency_symbol'] ?? '€';
-@endphp
-<div>
+<div class="space-y-4 pb-6"
+     x-data="{
+        activeTab: '{{ $type ?? 'all' }}',
+        selectedAccount: '{{ $accountId ?? '' }}',
+        searchQuery: '{{ $search ?? '' }}'
+     }">
+
     <!-- Top Header -->
-    <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ __('Budgets & Analytics') }}</h1>
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-brand-700 dark:text-brand-300 font-bold px-2 py-0.5 rounded-lg bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20">
-                {{ $data['currency'] ?? 'EUR' }} ({{ $sym }})
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                {{ __('All Transactions') }}
+            </h1>
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+                {{ $counts['all'] ?? $transactions->total() }} {{ __('transactions recorded') }}
             </span>
-        </div>
-    </div>
-
-    <!-- Month Navigation Bar -->
-    <div class="app-card rounded-2xl p-1.5 flex items-center justify-between mb-5 border border-slate-200 dark:border-slate-800">
-        <button hx-get="{{ route('budgets.index', ['month' => $data['prev_month']]) }}"
-                hx-target="#app-content"
-                class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-            </svg>
-        </button>
-
-        <span class="text-xs font-bold tracking-wide px-3 py-1 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 rounded-xl text-brand-700 dark:text-brand-300">
-            {{ $data['formatted_month'] }}
-        </span>
-
-        <button hx-get="{{ route('budgets.index', ['month' => $data['next_month']]) }}"
-                hx-target="#app-content"
-                class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-            </svg>
-        </button>
-    </div>
-
-    <!-- Budget Overview & Circular Segment Donut Card -->
-    <div class="app-card-glow rounded-3xl p-5 mb-5 relative overflow-hidden flex items-center justify-between">
-        <div class="space-y-1">
-            <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('Total Monthly Budget') }}</span>
-            <div class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                {{ $sym }}{{ number_format($data['total_limit'], 2) }}
-            </div>
-            <div class="text-xs text-slate-600 dark:text-slate-300 pt-1">
-                {{ __('Spent') }}: <strong class="text-brand-700 dark:text-brand-300">{{ $sym }}{{ number_format($data['total_spent'], 2) }}</strong> 
-                <span class="text-slate-500 dark:text-slate-400">({{ $data['overall_percentage'] }}%)</span>
-            </div>
-        </div>
-
-        <!-- Donut Progress Ring -->
-        <div class="relative w-24 h-24 flex-shrink-0 flex items-center justify-center">
-            <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
-                <path class="text-slate-200 dark:text-slate-800"
-                      stroke-width="3.5"
-                      stroke="currentColor"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path class="text-brand-400 transition-all duration-1000"
-                      stroke-dasharray="{{ min(100, $data['overall_percentage']) }}, 100"
-                      stroke-width="3.5"
-                      stroke-linecap="round"
-                      stroke="url(#budgetGradient)"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <defs>
-                    <linearGradient id="budgetGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#10b981" />
-                        <stop offset="50%" stop-color="#6366f1" />
-                        <stop offset="100%" stop-color="#ec4899" />
-                    </linearGradient>
-                </defs>
-            </svg>
-            <div class="absolute text-center flex flex-col items-center">
-                <span class="text-xs font-bold text-slate-900 dark:text-white">{{ $sym }}{{ number_format($data['total_spent'], 0) }}</span>
-                <span class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-tight">{{ __('Spent') }}</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Daily Allowance & Savings Target Banner -->
-    <div class="app-card rounded-2xl p-3.5 mb-5 border border-emerald-500/20 bg-gradient-to-r from-emerald-50/30 to-teal-50/20 dark:from-[#0f172a] dark:to-[#0c1322] flex items-center justify-between shadow-sm">
-        <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div>
-                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">{{ __('Daily Limit') }}</span>
-                <span class="text-sm font-black text-slate-900 dark:text-white">{{ $sym }}{{ number_format($data['daily_spending_limit'], 2) }} / {{ __('day') }}</span>
-            </div>
         </div>
 
         <button type="button"
                 @click="modalOpen = true"
-                hx-get="{{ route('savings.modal') }}"
+                hx-get="{{ route('transactions.create') }}"
                 hx-target="#modal-body"
-                class="px-2.5 py-1 rounded-xl bg-emerald-100/80 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold hover:scale-105 transition-all flex items-center gap-1 shadow-sm">
-            <span>🎯 {{ $data['savings_target_percentage'] }}% {{ __('Savings') }}</span>
-            <svg class="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                hx-swap="innerHTML"
+                class="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
             </svg>
+            <span>{{ __('Add Transaction') }}</span>
         </button>
     </div>
 
-    <!-- Category Budget Cards List -->
-    <div class="space-y-3"
-         hx-get="{{ route('budgets.index', ['month' => $data['month']]) }}"
-         hx-trigger="budgetUpdated from:window, categoryCreated from:window, categoryUpdated from:window, categoryDeleted from:window, savingsTargetUpdated from:window, transactionCreated from:window, transactionUpdated from:window, transactionDeleted from:window"
-         hx-swap="innerHTML">
-        
-        <div class="flex items-center justify-between px-1">
-            <h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('Category Budgets') }}</h2>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('categories.index') }}" class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline">
-                    {{ __('Manage') }}
-                </a>
-                <button @click="modalOpen = true"
-                        hx-get="{{ route('categories.create', ['type' => 'expense']) }}"
-                        hx-target="#modal-body"
-                        hx-swap="innerHTML"
-                        class="px-2.5 py-1 rounded-lg bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 text-brand-700 dark:text-brand-300 text-[11px] font-bold flex items-center gap-1 hover:bg-brand-100 dark:hover:bg-brand-500/20 transition-all">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>{{ __('Add Category') }}</span>
-                </button>
+    <!-- Financial Stats Hero Bar (Income, Expense, Net) -->
+    <div class="app-card-glow rounded-3xl p-4 border border-slate-200 dark:border-[#232d42] bg-gradient-to-br from-white via-slate-50 to-slate-100/60 dark:from-[#141926] dark:via-[#10141f] dark:to-[#0c1017] shadow-sm">
+        <div class="grid grid-cols-3 gap-2 text-center divide-x divide-slate-200 dark:divide-slate-800">
+            <!-- Income -->
+            <div class="px-1">
+                <span class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block truncate">
+                    {{ __('Income') }}
+                </span>
+                <span class="text-sm font-black text-emerald-600 dark:text-emerald-400 block truncate mt-0.5">
+                    +{{ $currencySymbol }}{{ number_format($totalIncome ?? 0, 2) }}
+                </span>
+            </div>
+
+            <!-- Expense -->
+            <div class="px-1">
+                <span class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block truncate">
+                    {{ __('Expenses') }}
+                </span>
+                <span class="text-sm font-black text-slate-900 dark:text-white block truncate mt-0.5">
+                    -{{ $currencySymbol }}{{ number_format($totalExpense ?? 0, 2) }}
+                </span>
+            </div>
+
+            <!-- Net Balance -->
+            <div class="px-1">
+                <span class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block truncate">
+                    {{ __('Net Balance') }}
+                </span>
+                <span class="text-sm font-black {{ ($netSavings ?? 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }} block truncate mt-0.5">
+                    {{ ($netSavings ?? 0) >= 0 ? '+' : '' }}{{ $currencySymbol }}{{ number_format($netSavings ?? 0, 2) }}
+                </span>
             </div>
         </div>
+    </div>
 
-        @foreach($data['category_budgets'] as $cat)
-            <div class="app-card rounded-2xl p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700/80"
-                 x-data="{ editing: false, newLimit: '{{ $cat['limit'] }}' }">
-                
-                <div class="flex items-center justify-between mb-2.5">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                             style="background-color: {{ $cat['color'] }}20; color: {{ $cat['color'] }};">
-                            <x-category-icon :icon="$cat['icon']" class="w-4 h-4" />
-                        </div>
-                        <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $cat['name'] }}</span>
-                    </div>
+    <!-- Search & Filters Container -->
+    <div class="space-y-2.5">
+        <!-- Live Search Bar -->
+        <div class="relative">
+            <input type="text"
+                   name="search"
+                   placeholder="{{ __('Search transactions, notes, categories...') }}"
+                   value="{{ $search ?? '' }}"
+                   hx-get="{{ route('budgets.index') }}"
+                   hx-trigger="keyup changed delay:300ms, search"
+                   hx-target="#all-transactions-feed"
+                   hx-swap="innerHTML"
+                   hx-include="#all-tx-type-input, #all-tx-account-input"
+                   hx-indicator="#all-transactions-feed"
+                   class="w-full bg-slate-50 dark:bg-[#141926] border border-slate-200 dark:border-[#232d42] rounded-2xl py-2.5 pl-10 pr-4 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-xs">
+            <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        </div>
 
-                    <div>
-                        <span class="text-xs font-semibold {{ $cat['is_over'] ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300' }}">
-                            {{ $sym }}{{ number_format($cat['spent'], 0) }} / {{ $sym }}{{ number_format($cat['limit'], 0) }} 
-                            <span class="{{ $cat['is_over'] ? 'text-rose-500 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400' }}">({{ $cat['pct_of_budget'] }}%)</span>
-                        </span>
-                    </div>
-                </div>
+        <input type="hidden" id="all-tx-type-input" name="type" :value="activeTab === 'all' ? '' : activeTab">
+        <input type="hidden" id="all-tx-account-input" name="account_id" :value="selectedAccount">
 
-                <!-- Progress Bar -->
-                <div class="w-full bg-slate-200 dark:bg-slate-800/80 rounded-full h-2 overflow-hidden mb-2">
-                    <div class="h-full rounded-full transition-all duration-500 {{ $cat['is_over'] ? 'bg-rose-500' : 'bg-gradient-to-r from-emerald-400 to-teal-400' }}"
-                         style="width: {{ min(100, $cat['pct_of_budget']) }}%;">
-                    </div>
-                </div>
+        <!-- Type Filter Pills -->
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-0.5 text-xs">
+            <button type="button"
+                    @click="activeTab = 'all'"
+                    hx-get="{{ route('budgets.index', ['account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                    hx-target="#all-transactions-feed"
+                    hx-swap="innerHTML"
+                    :class="activeTab === 'all' ? 'bg-brand-600 text-white font-bold shadow-xs' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white'"
+                    class="px-3.5 py-1.5 rounded-full transition-all text-xs whitespace-nowrap">
+                {{ __('All') }} ({{ $counts['all'] ?? $transactions->total() }})
+            </button>
+            <button type="button"
+                    @click="activeTab = 'expense'"
+                    hx-get="{{ route('budgets.index', ['type' => 'expense', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                    hx-target="#all-transactions-feed"
+                    hx-swap="innerHTML"
+                    :class="activeTab === 'expense' ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white font-bold shadow-xs' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white'"
+                    class="px-3.5 py-1.5 rounded-full transition-all text-xs whitespace-nowrap">
+                {{ __('Expenses') }} ({{ $counts['expense'] ?? 0 }})
+            </button>
+            <button type="button"
+                    @click="activeTab = 'income'"
+                    hx-get="{{ route('budgets.index', ['type' => 'income', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                    hx-target="#all-transactions-feed"
+                    hx-swap="innerHTML"
+                    :class="activeTab === 'income' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-xs' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white'"
+                    class="px-3.5 py-1.5 rounded-full transition-all text-xs whitespace-nowrap">
+                {{ __('Income') }} ({{ $counts['income'] ?? 0 }})
+            </button>
+            @if(!empty($counts['transfer']))
+                <button type="button"
+                        @click="activeTab = 'transfer'"
+                        hx-get="{{ route('budgets.index', ['type' => 'transfer', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+                        hx-target="#all-transactions-feed"
+                        hx-swap="innerHTML"
+                        :class="activeTab === 'transfer' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'bg-white dark:bg-[#141926] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#232d42] font-semibold hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3.5 py-1.5 rounded-full transition-all text-xs whitespace-nowrap">
+                    {{ __('Transfers') }} ({{ $counts['transfer'] }})
+                </button>
+            @endif
+        </div>
 
-                <!-- Footer info & edit button -->
-                <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-                    <span>
-                        @if($cat['is_over'])
-                            <span class="text-rose-600 dark:text-rose-400 font-semibold">{{ $sym }}{{ number_format($cat['spent'] - $cat['limit'], 2) }} {{ __('over limit') }}</span>
-                        @else
-                            <span>{{ $sym }}{{ number_format($cat['remaining'], 2) }} {{ __('left') }}</span>
-                        @endif
-                    </span>
-
-                    <div class="flex items-center gap-3">
-                        <button @click="modalOpen = true"
-                                hx-get="{{ route('categories.edit', $cat['id']) }}"
-                                hx-target="#modal-body"
-                                hx-swap="innerHTML"
-                                class="text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 font-medium">
-                            {{ __('Edit') }}
-                        </button>
-                        <button @click="editing = !editing" class="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-medium">
-                            <span x-text="editing ? '{{ __('Cancel') }}' : '{{ __('Edit Limit') }}'"></span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Inline Quick Edit Form -->
-                <div x-show="editing" class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800" style="display: none;">
-                    <form hx-post="{{ route('budgets.update') }}"
-                          hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token() }}"}'
-                          class="flex items-center gap-2">
-                        <input type="hidden" name="category_id" value="{{ $cat['id'] }}">
-                        <input type="hidden" name="period_month" value="{{ $data['month'] }}">
-                        <div class="relative flex-1">
-                            <span class="absolute left-3 top-2 text-xs text-slate-400">{{ $sym }}</span>
-                            <input type="number" 
-                                   step="1" 
-                                   min="0" 
-                                   name="monthly_limit" 
-                                   x-model="newLimit" 
-                                   class="w-full bg-slate-50 dark:bg-[#181f2e] border border-slate-200 dark:border-[#2a3449] rounded-xl py-1.5 pl-6 pr-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-500">
-                        </div>
-                        <button type="submit" 
-                                @click="editing = false"
-                                class="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold">
-                            {{ __('Save') }}
-                        </button>
-                    </form>
-                </div>
+        <!-- Accounts Horizontal Filter Pills -->
+        @if(isset($accounts) && $accounts->count() > 1)
+            <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 text-[11px] items-center">
+                <span class="text-[10px] uppercase font-bold text-slate-400 mr-1 flex-shrink-0">{{ __('Accounts') }}:</span>
+                <button type="button"
+                        @click="selectedAccount = ''"
+                        hx-get="{{ route('budgets.index', ['type' => $type ?? '', 'search' => $search ?? '']) }}"
+                        hx-target="#all-transactions-feed"
+                        hx-swap="innerHTML"
+                        :class="selectedAccount === '' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-2.5 py-1 rounded-xl transition-all whitespace-nowrap flex-shrink-0">
+                    {{ __('All Accounts') }}
+                </button>
+                @foreach($accounts as $acc)
+                    <button type="button"
+                            @click="selectedAccount = '{{ $acc->id }}'"
+                            hx-get="{{ route('budgets.index', ['account_id' => $acc->id, 'type' => $type ?? '', 'search' => $search ?? '']) }}"
+                            hx-target="#all-transactions-feed"
+                            hx-swap="innerHTML"
+                            :class="selectedAccount === '{{ $acc->id }}' ? 'border-2 border-brand-500 font-bold' : 'border border-slate-200 dark:border-slate-800'"
+                            class="px-2.5 py-1 rounded-xl bg-white dark:bg-[#141926] text-slate-700 dark:text-slate-300 transition-all whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
+                        <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $acc->color }};"></span>
+                        <span>{{ $acc->name }}</span>
+                    </button>
+                @endforeach
             </div>
-        @endforeach
+        @endif
+    </div>
+
+    <!-- Feed Container -->
+    <div id="all-transactions-feed"
+         class="space-y-2.5 transition-opacity duration-150 [&.htmx-request]:opacity-50"
+         hx-get="{{ route('budgets.index', ['feed_only' => 1, 'type' => $type ?? '', 'account_id' => $accountId ?? '', 'search' => $search ?? '']) }}"
+         hx-trigger="transactionCreated from:window, transactionUpdated from:window, transactionDeleted from:window"
+         hx-swap="innerHTML">
+        @include('budgets.partials.transactions_feed', ['transactions' => $transactions, 'currencySymbol' => $currencySymbol, 'accountId' => $accountId ?? null])
     </div>
 </div>

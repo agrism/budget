@@ -10,6 +10,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use App\Models\Transaction;
+
 class BudgetController extends Controller
 {
     public function __construct(protected BudgetService $budgetService) {}
@@ -28,14 +30,87 @@ class BudgetController extends Controller
     public function index(Request $request)
     {
         $user = $this->getActiveUser();
-        $month = $request->get('month', Carbon::now()->format('Y-m'));
-        $data = $this->budgetService->getBudgetsAnalytics($user, $month);
+        $search = $request->get('search');
+        $type = $request->get('type');
+        $accountId = $request->get('account_id');
 
-        if ($request->header('HX-Request')) {
-            return view('budgets.partials.content', compact('data'));
+        $query = $user->transactions()
+            ->with(['category', 'account', 'destinationAccount'])
+            ->orderBy('transacted_at', 'desc')
+            ->orderBy('id', 'desc');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('note', 'like', "%{$search}%")
+                  ->orWhereHas('category', function ($cq) use ($search) {
+                      $cq->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('account', function ($aq) use ($search) {
+                      $aq->where('name', 'like', "%{$search}%");
+                  });
+            });
         }
 
-        return view('budgets.index', compact('data'));
+        if ($type && in_array($type, ['expense', 'income', 'transfer'])) {
+            $query->where('type', $type);
+        }
+
+        if ($accountId) {
+            $query->where(function ($q) use ($accountId) {
+                $q->where('account_id', $accountId)
+                  ->orWhere('destination_account_id', $accountId);
+            });
+        }
+
+        $transactions = $query->paginate(20)->withQueryString();
+        $accounts = $user->accounts()->where('is_active', true)->get();
+
+        // Transaction counts for filter pills (across all accounts or filtered account)
+        $baseCountQuery = $user->transactions();
+        if ($accountId) {
+            $baseCountQuery->where(function ($q) use ($accountId) {
+                $q->where('account_id', $accountId)
+                  ->orWhere('destination_account_id', $accountId);
+            });
+        }
+
+        $counts = [
+            'all' => (clone $baseCountQuery)->count(),
+            'expense' => (clone $baseCountQuery)->where('type', 'expense')->count(),
+            'income' => (clone $baseCountQuery)->where('type', 'income')->count(),
+            'transfer' => (clone $baseCountQuery)->where('type', 'transfer')->count(),
+        ];
+
+        // Overall income / expense sums for summary stats
+        $totalExpense = (float) (clone $baseCountQuery)->where('type', 'expense')->sum('amount');
+        $totalIncome = (float) (clone $baseCountQuery)->where('type', 'income')->sum('amount');
+        $netSavings = $totalIncome - $totalExpense;
+
+        $currency = $user->currency ?: 'EUR';
+        $currencySymbol = BudgetService::currencySymbol($currency);
+
+        if ($request->header('HX-Request') && $request->has('feed_only')) {
+            return view('budgets.partials.transactions_feed', compact('transactions', 'currencySymbol', 'accountId'));
+        }
+
+        $viewData = compact(
+            'transactions',
+            'accounts',
+            'counts',
+            'currencySymbol',
+            'type',
+            'search',
+            'accountId',
+            'totalExpense',
+            'totalIncome',
+            'netSavings'
+        );
+
+        if ($request->header('HX-Request')) {
+            return view('budgets.partials.content', $viewData);
+        }
+
+        return view('budgets.index', $viewData);
     }
 
     public function update(Request $request)
