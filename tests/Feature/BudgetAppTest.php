@@ -687,6 +687,12 @@ class BudgetAppTest extends TestCase
         $response->assertSee('Pārvaldīt');
         $response->assertSee('Pievienot kategoriju');
 
+        // Check budget details elements from Image 2
+        $response->assertSee('atlicis');
+        $response->assertSee('Rediģēt');
+        $response->assertSee('Mainīt limitu');
+        $response->assertSee(route('budgets.update'));
+
         // Check category links to category transactions show route
         $category = $this->user->categories()->where('type', 'expense')->first();
         $this->assertNotNull($category);

@@ -83,6 +83,7 @@ class BudgetService
                 $budget = $budgets->firstWhere('category_id', $cat->id);
                 $limit = $budget ? (float) $budget->monthly_limit : 0;
                 $percentage = $limit > 0 ? min(100, round(($spent / $limit) * 100)) : 0;
+                $pctOfBudget = $limit > 0 ? round(($spent / $limit) * 100) : 0;
                 $isOver = $limit > 0 && $spent > $limit;
                 $sharePercentage = $monthlyExpense > 0 ? round(($spent / $monthlyExpense) * 100, 1) : 0;
 
@@ -94,8 +95,11 @@ class BudgetService
                     'spent' => $spent,
                     'limit' => $limit,
                     'percentage' => $percentage,
+                    'pct_of_budget' => $pctOfBudget,
                     'share_percentage' => $sharePercentage,
+                    'pct_of_total_spend' => $sharePercentage,
                     'is_over' => $isOver,
+                    'remaining' => max(0, $limit - $spent),
                 ];
             });
 
